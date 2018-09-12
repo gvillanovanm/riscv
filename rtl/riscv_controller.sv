@@ -681,7 +681,7 @@ module riscv_controller
               dbg_trap_o            = dbg_settings_i[DBG_SETS_SSTE];
           end
           ebrk_insn_i: begin
-              dbg_trap_o    = dbg_settings_i[DBG_SETS_EBRK] | dbg_settings_i[DBG_SETS_SSTE];
+              dbg_trap_o    = 1'b1;
               exc_cause_o   = EXC_CAUSE_BREAKPOINT;
           end
           csr_status_i: begin

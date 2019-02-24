@@ -110,7 +110,7 @@ module riscv_controller
 
   // Debug Signal
   output logic         debug_mode_o,
-  //output logic         debug_cause_o,
+  output logic [2:0]   debug_cause_o,
   input  logic         debug_req_i,
   input  logic         debug_single_step_i,
   input  logic         debug_ebreakm_i,
@@ -815,9 +815,11 @@ module riscv_controller
         pc_set_o          = 1'b1;
         pc_mux_o          = PC_EXCEPTION;
         exc_pc_mux_o      = EXC_PC_DBD;
+        // TODO: what is this for?
         csr_save_cause_o  = ebrk_insn_i ? 1'b0: 1'b1;
-//        csr_cause_o       = {1'b1,irq_id_ctrl_i};
         csr_save_id_o     = ebrk_insn_i ? 1'b0: 1'b1;
+        // TOOD: missing debug cause
+        //debug_cause_o = DBG_CAUSE_STEP;
         ctrl_fsm_ns       = DECODE;
       end
 
@@ -828,9 +830,14 @@ module riscv_controller
         pc_mux_o          = PC_EXCEPTION;
         exc_pc_mux_o      = EXC_PC_DBD;
         csr_save_cause_o  = 1'b1;
-//        csr_cause_o       = {1'b1,irq_id_ctrl_i};
-        csr_save_if_o     = 1'b1;
-        ctrl_fsm_ns       = DECODE;
+        if (debug_single_step_i)
+            debug_cause_o = DBG_CAUSE_STEP;
+        if (debug_req_i)
+            debug_cause_o = DBG_CAUSE_STEP;
+        if (ebrk_insn_i)
+            debug_cause_o = DBG_CAUSE_EBREAK;
+        csr_save_if_o   = 1'b1;
+        ctrl_fsm_ns     = DECODE;
       end
 
       DBG_FLUSH:
